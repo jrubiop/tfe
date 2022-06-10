@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>TFE: DApp</title>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- <script language="javascript" type="text/javascript" src="web3.min.js"></script> -->
+    <script language="javascript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+  </head>
+  <body>
+    <div id="txStatus"></div>
+    <div id="info">
+
+    </div>
+    <div id="botones">
+      <input id="b1" name="b1" type="button" value="Info Metamask">
+      <input id="b2" name="b2" type="button" value="Conectar Metamask">
+      <input id="b3" name="b3" type="button" value="Transf desde blockchain">
+      <input id="b4" name="b4" type="button" value="Transf desde metmask">
+    </div>
+    <hr>
+    <div id="botonesSC">
+      <input id="sc1" name="b1" type="button" value="b1">
+      <input id="sc2" name="b2" type="button" value="b2">
+
+      <input id="altaPieza" name="altaPieza" type="button" value="Alta">
+      <input id="verPiezas" name="verPiezas" type="button" value="Ver piezas">
+    </div>
+
+      <div id="datosAlta" style="display: none;">
+        <p><span class="">NIF:</span><input type="text" name="NIF" value="" /></p>
+        <p><span class="">TITULO:</span><input type="text" name="titulo" value="" /></p>
+        <p><span class="">URL NOTICIA:</span><input type="text" name="URL" value="" /></p>
+        <p><span class="">TEXTO NOTICIA:</span><input type="text" name="datos" value="" /></p>
+        <input id="submitPieza" name="submitPieza" type="submit" value="Enviar Alta">
+      </div>
+      
+      <div id="datosPiezas"></div>
+
+    </form>
+
+ 
+    <script>
+      var userAccount;
+      var web3js;
+
+      function startApp() {
+        var cryptoZombiesAddress = "YOUR_CONTRACT_ADDRESS";
+        cryptoZombies = new web3js.eth.Contract(cryptoZombiesABI, cryptoZombiesAddress);
+ 
+        // 2. Create `setInterval` code here
+        var accountInterval = setInterval(function() {
+          
+          if (web3.eth.accounts[0] !== userAccount) {
+            userAccount = web3.eth.accounts[0];
+            
+            getZombiesByOwner(userAccount)
+            .then(displayZombies);
+          }
+        }, 100);
+      }
+
+      var myABI = [
+        {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        }
+      ],
+      "name": "set",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "get",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "saluda",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "fullGas",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "seeValues",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_message",
+          "type": "string"
+        }
+      ],
+      "name": "setMessage",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMessage",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+
+        ];
+      var myContractAddress = '0xe174Bb555C318359193E589b934dFaBd27cF2853';
+
+      var srcWalletAddr  = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
+      var destWalletAddr = '0x8Ce9f327bFa7B52508aFbf539663b59c826Fc690';
+
+      function verCuentas() {
+
+        console.log('--- CUENTAS ---');
+        web3js.eth.getAccounts()
+          .then(function(acc){
+            console.log('acc:',acc)
+          })
+        console.log('--- FIN ---');
+
+        console.log('Cuenta --->');
+        console.log(web3js.eth.accounts);        
+        /*
+        var accountInterval = setInterval(function() {
+        }, 100);
+        */
+      }
+ 
+      function verBalance(_addr) {
+        //myWalletAddr = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
+        //myWalletAddr = '0x8Ce9f327bFa7B52508aFbf539663b59c826Fc690';
+        //var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        web3js.eth.getBalance(_addr)
+          .then( function(b) {
+              var total = Web3.utils.fromWei(b, "ether");
+              console.log("T->", total)
+          })
+          .catch( function(r) {
+            console.log('ERR-->', r);
+          })
+      }      
+
+      function verContratos() {
+
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+
+        // Ejecutar funciones del SC
+        //myContract.methods.myMethod(123).call();
+        //myContract.methods.myMethod(123).send();
+
+        // Hash de un mensaje
+        //web3js.eth.accounts.hashMessage(message);
+
+        console.log('Contract->');
+        console.log(myContract);
+      }
+
+
+      function pepe1() {
+
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        console.log('Contract->');
+        console.log(myContract);
+        console.log('Acc:', myContract.defaultAccount); 
+
+        /*
+        *************************
+        // Ejecutar funciones del SC
+        myContract.methods.saluda().call()
+          .then( function(aaa) {
+            console.log('CALL-saluda():', aaa)
+          });
+        *******************************
+        */
+
+        console.log(myContract.methods);
+        myWalletAddr = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
+
+        //var aa = myContract.methods.set(3).call();
+        myContract.methods.set(3).send(
+          {
+            from: myWalletAddr,
+            //value: web3js.utils.toWei("0.0001", "ether"),
+            data: 'dataaaaa'
+          }
+        )
+          .then( function(s) {
+            console.log('set()->', s);
+          })
+
+          /*
+          .then(
+            //b = myContract.methods.get().call()
+            myContract.methods.get().call()
+              .then( function(e) {
+                console.log('get()->', e);
+              })
+          )
+          */
+          .catch( function(r) {
+            console.log(r);
+          });
+
+
+        var b = myContract.methods.get().call()
+          .then( function(g) {
+            console.log('get()->',g, b);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });
+
+
+        /*
+        var a = myContract.methods.setMessage("HOLA HOLA").call()
+          .then( function(s) {
+            console.log(s);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });
+
+        var b = myContract.methods.getMessage().call()
+          .then( function(bb) {
+            console.log('getMessage():', bb)
+          });
+        console.log('b:', b);
+        */
+      }
+
+      function hazTransferencia() {
+
+        // Comprobacion wallet
+        if (typeof window.ethereum == 'undefined') {
+          console.log('ERR En MetaMask ');
+          return false;
+        }
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          console.log('Billetera no conectada....');
+          return false;
+        }
+        console.log('Addrr-->', eth.selectedAddress);
+        var srcWalletAddr = eth.selectedAddress;
+
+        console.log("Mandando transfer a blockchain...");
+        web3js.eth.sendTransaction(
+          {
+            from: srcWalletAddr,
+            to: destWalletAddr,
+            value: Web3.utils.toWei("0.03", "ether"),
+            //value: '100000000000000000'
+            //data: '0Xddddd'
+            //data: Web3.utils.asciiToHex('hooola')
+          }
+        )
+          .then( function(receipt) {
+            console.log('sendTransaction()->', receipt);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });        
+
+      }
+
+      //////window.addEventListener('load', function() {
+      function LOAD_OLD() {
+
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        //if (typeof web3 !== 'undefined') {
+        //  web3js = new Web3(window.web3.currentProvider);
+        //}
+        //if (typeof window.ethereum != 'undefined') {
+        if ( 0 ) {
+          // Use Mist/MetaMask's provider
+          console.log('rama 1-->');
+          web3js = new Web3(window.ethereum);
+          
+        }
+        //else if (typeof window.web3 !== 'undefined') {
+        else if (0) {
+          // Handle the case where the user doesn't have Metamask installed
+          console.log('rama 2-->');
+          web3js = new Web3(window.web3.currentProvider);
+
+          console.log('currentProvider-->', window.web3.currentProvider);
+
+          //web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+          //console.log('rama 2 -->');
+        }
+        else {
+          console.log('rama 3 -->');
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+        }
+
+        /* init billetera
+        window.ethereum.request( {method: 'eth_requestAccounts' } )
+            .then( function(a) {
+              console.log('eth_requestAccounts->', a);
+            })
+            */
+
+
+        /*
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        //if (typeof web3js !== 'undefined') {
+        if (typeof window.ethereum == 'undefined') {
+          // Use Mist/MetaMask's provider
+          web3js = new Web3(Web3.currentProvider);
+          console.log('rama 1-->', Web3.currentProvider);
+          window.ethereum
+        }
+        else {
+          // Handle the case where the user doesn't have Metamask installed
+          // Probably show them a message prompting them to install Metamask
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+          console.log('rama 2 -->');
+        }
+        **********
+        */
+
+        /* init billetera
+        window.ethereum.request( {method: 'eth_requestAccounts' } )
+            .then( function(a) {
+              console.log('eth_requestAccounts->', a);
+            })
+            */
+        console.log('ethereum-->', window.ethereum);
+        console.log('web3-->', window.web3);
+        console.log('web3js -->', web3js);
+        console.log('currentProvider -->', web3js.currentProvider);
+
+        // Now you can start your app & access web3 freely:
+        //startApp()
+        //pepe1();
+        //pepe2();
+      //})
+      }
+      
+      document.getElementById("b1").addEventListener('click', function(ev) {
+        if (typeof window.ethereum !== 'undefined') {
+          console.log('MetaMask is installed!');
+          var eth = window.ethereum;
+
+          console.log('Version-->', eth.networkVersion);
+          console.log('Addrr-->', eth.selectedAddress);
+          console.log('IsMETA-->', eth.isMetaMask);
+        }
+        else {
+          console.log('MetaMask is NOT installed!');
+        }
+      }, );
+
+      document.getElementById("b2").addEventListener('click', function(ev) {
+
+        // Para conectarse con la wallet
+        if (typeof window.ethereum == 'undefined') {
+          console.log('ERR En MetaMask ');
+          return false;
+        }
+
+        var eth = window.ethereum;
+        console.log('Conectando billetera....');
+        eth.request(
+          {method: 'eth_requestAccounts' }
+        )
+        .then( function(result) {
+          console.log(result);
+
+          $("#info").empty();
+          $("#info").append('<p>' + result  + '</p>');
+        })
+        .catch( function(err) {
+          console.log('ERR requestAccounts ->', err);
+        });
+        
+        eth.on('accountsChanged', function (accounts) {
+          console.log('cuenta cambiada!!!!');
+        });
+        eth.on('chainChanged', function (chainId) {
+          console.log('red cambiada!!!!');
+        });
+
+        //eth.removeListener('accountsChanged', handleAccountsChanged);
+        //eth.on('connect', function (c) {});
+        //eth.on('disconnect', function (d) {});
+        //eth.on('message', function (m) {});
+      }, );
+      
+      document.getElementById("b3").addEventListener('click', function(ev) {
+        hazTransferencia();
+        return true;
+      });
+
+      document.getElementById("b4").addEventListener('click', function(ev) {
+
+        // Comprobacion wallet
+        if (typeof window.ethereum == 'undefined') {
+          console.log('ERR En MetaMask ');
+          return false;
+        }
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          console.log('Billetera no conectada....');
+          return false;
+        }
+
+        console.log('Envio desde wallet Metamask');
+
+        var srcWalletAddr = eth.selectedAddress;
+        console.log('Addrr-->', srcWalletAddr);
+
+        eth.request(
+        {
+          method: 'eth_sendTransaction',
+          params: [
+          {
+            from: srcWalletAddr,
+            to: destWalletAddr,
+            //value: Web3.utils.toWei("0.01", "ether"),
+            value: '100000000000000000'
+            //gasPrice: '0x09184e72a000',
+            //gas: '0x2710',
+            //data: Web3.utils.asciiToHex('hola hola')
+          }],
+        })
+          .then( function(receipt) {
+            console.log('sendTransaction()->', receipt);
+          })
+          .catch( function(r) {
+            console.log(r);
+          }); 
+
+      });
+
+      document.getElementById("sc1").addEventListener('click', function(ev) {
+        verCuentas();
+        verContratos();
+        verBalance(srcWalletAddr);
+      });
+
+      document.getElementById("sc2").addEventListener('click', function(ev) {
+        var srcWalletAddr1  = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
+        var destWalletAddr1 = '0x8Ce9f327bFa7B52508aFbf539663b59c826Fc690';
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          console.log('Billetera no conectada....');
+          return false;
+        }
+
+        web3js.eth.sendTransaction(
+          {
+            from: srcWalletAddr1,
+            to: destWalletAddr1,
+            value: Web3.utils.toWei("0.01", "ether"),
+            //value: '100000000000000000'
+            //data: '0Xddddd'
+            //data: Web3.utils.asciiToHex('hooola')
+          }
+        )
+          .then( function(receipt) {
+            console.log('sendTransaction()->', receipt);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });        
+
+
+
+      });      
+
+
+
+      window.addEventListener('load', function() {
+
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        //if (typeof web3 !== 'undefined') {
+        //  web3js = new Web3(window.web3.currentProvider);
+        //}
+        if (typeof window.ethereum != 'undefined') {
+          // Use Mist/MetaMask's provider
+          console.log('rama 1-->');
+          web3js = new Web3(window.ethereum);
+          
+        }
+        else if (typeof window.web3 !== 'undefined') {
+          // Handle the case where the user doesn't have Metamask installed
+          console.log('rama 2-->');
+          web3js = new Web3(window.web3.currentProvider);
+          console.log('currentProvider-->', window.web3.currentProvider);
+        }
+        else {
+          console.log('rama 3 -->');
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+        }
+
+        /* init billetera
+        window.ethereum.request( {method: 'eth_requestAccounts' } )
+            .then( function(a) {
+              console.log('eth_requestAccounts->', a);
+            })
+            */
+      })
+
+
+      document.getElementById("altaPieza").addEventListener('click', function(ev) {
+        document.getElementById("datosAlta").style="display: block;";
+      });
+      document.getElementById("submitPieza").addEventListener('click', function(ev) {
+        alert("Enviado datos al SC");
+      });
+
+      document.getElementById("verPiezas").addEventListener('click', function(ev) {
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          console.log('Billetera no conectada....');
+          console.log('Conectando billetera....');
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+
+            $("#info").empty();
+            $("#info").append('<p>' + result  + '</p>');
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+
+
+          return false;
+        }
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Mi Address->', myAddress);
+        
+        console.log('Ver todas las piezas');
+        myContract.methods.obtenerTodasPiezasColaborador(myAddress).call();
+
+        // Ejecutar funciones del SC
+        //myContract.methods.myMethod(123).call();
+        //myContract.methods.myMethod(123).send();
+
+        // Hash de un mensaje
+        //web3js.eth.accounts.hashMessage(message);
+      });
+
+    </script>
+  </body>
+</html>
+ 

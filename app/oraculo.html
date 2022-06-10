@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- === <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> === -->
+    <!-- === <script language="javascript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script> === -->
+    <script language="javascript" type="text/javascript" src="js/jquery.min.js"></script>
+    
+    <!-- <script language="javascript" type="text/javascript" src="js/web3.min.js"></script> -->
+    <script language="javascript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+    <script language="javascript" type="text/javascript" src="js/datos.js"></script>
+    
+    <link href="css/estilos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <title>TFE: Oráculo</title>
+
+    <style type="text/css">
+      .Global {
+        height: 400px;
+        /*width: 200px; */
+        border: 1px solid #ddd;
+        background: #f1f1f1;
+        overflow-y: scroll;
+      }
+      .classInfoOraculo {
+        height: auto;
+        color: #0f5132;
+        background-color: #d1e7dd;
+        border-color: #badbcc;
+      }
+      .classInfoCMS {
+        height: auto;
+        color: #664d03;
+        background-color: #fff3cd;
+        border-color: #ffecb5;
+      }
+      .classTextoInfoCMS {
+        height: auto;
+        Ccolor: #664d03;
+        Bbackground-color: #fff3cd;
+        Bborder-color: #ffecb5;
+      }      
+      .texto {
+        padding:4px;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: small;
+        background:rgb(255, 255, 255);
+      }
+
+      .titulo-texto {
+        padding-right: 5px;
+        padding-left: 5px;
+      }
+      .titulo-pagado {
+        padding-right: 5px;
+        padding-left: 5px;
+        background-image: url("/TFE/app/img/eth1.png");
+
+        background-color: #cccccc;
+        /*height: 500px;*/
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;        
+      }
+
+    </style>
+
+  </head>
+  <body class="main">
+
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div id="botones" class="container" style="display:block;">
+            <button id="conectarWallet" name="conectarWallet" type="button" class="btn btn-secondary">Conectar Metamask</button>
+            <button id="saldoWallet"    name="saldoWallet" type="button" class="btn btn-secondary">Saldo Cuenta</button>
+            <button id="cuentasWallet" name="cuentasWallet" type="button" class="btn btn-secondary">Ver Cuentas</button>
+            <button id="verOwner" name="verOwner" type="button" class="btn btn-secondary">Ver Owner</button>
+          </div>
+          <div id="infoWallet" class="alert alert-success" role="alert"></div>
+          <div id="infoAviso" class="alert alert-danger" role="alert" style="display:none;">Para poder gestionar el oráculo y el CMS hay que ser Administrador</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div id="columnaOraculo" class="col">
+          <div class="row">
+            <h2>Panel del Oráculo</h2>
+            <span>Recibe los eventos del SC y del CMS</span>
+            <span>Conecta el SC del oráculo con el API del CMS</span>
+          </div>
+          <div class="row">
+            <div class="btn-group" role="group" aria-label="Botonera">
+              <button type="button" id="empezar" class="btn btn-secondary">Escuchar eventos</button>
+              <button type="button" id="parar" class="btn btn-secondary">Parar</button>
+                <button type="button" id="addMsg" class="btn btn-secondary">Nuevo MSG</button>
+              <button type="button" id="limpiarPanel" class="btn btn-secondary">Limpiar</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="Global">
+              <div id="infoOraculo" class="classInfoOraculo"></div>
+            </div>
+          </div>
+        </div>
+        <div id="columnaCMS"class="col">
+          <div class="row">
+              <h2>Panel del CMS</h2>
+              <span>Recibe las peticiones del Oráculo</span>
+              <span>Conecta el oráculo off-chain con el API del CMS</span>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <button type="button" id="addMsgCMS" class="btn btn-secondary">Nuevo MSG CMS</button>
+              <button type="button" id="limpiarPanelCMS" class="btn btn-secondary">Limpiar CMS</button>
+              <button type="button" id="addPiezaCMS" class="btn btn-secondary">New Pieza CMS</button>
+              <button id="botonVerNoticias"  type="button" class="btn btn-success">Listar noticias</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="Global">
+              <div id="infoCMS" class="classInfoCMS" role="alert"></div>  
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="filaPiezas" class="row">
+        <div id="msgInfoPiezas" class="classTextoInfoCMS" role="alert">
+          <h2>Listado de noticias del CMS</h2>
+        </div>
+        <div class="Global">
+          <div id="infoPiezas" class="classInfoCMS" role="alert"></div>  
+        </div>
+      </div>
+
+    </div>
+
+  </body>
+    <script>
+      var userAccount;
+      var web3js;
+      var walletInterval;
+      var msgInterval;
+      var actualAddr = null;
+
+      var evPublicar = null;
+      var nombreEventoevPublicado = 'evPublicado';
+
+      // Para guardar las transacciones y evitar las duplicaciones de eventos
+      var listaTrx = {};
+
+      ///////////////////////////////////////////////////////////////
+      // Funciones
+      ///////////////////////////////////////////////////////////////
+
+      function verCuentas() {
+        
+        /*
+        ***************
+        console.log('Cuenta --->');
+        console.log(web3js.eth.accounts);
+
+        console.log('--- CUENTAS ---');
+        web3js.eth.getAccounts()
+          .then(function(acc){
+            console.log('acc:', acc)
+          })
+        console.log('--- FIN ---');
+        **************
+        */
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Mi Address->', myAddress);        
+
+        myContract.methods.getAddressContract().call()
+          .then( function(result) {
+            console.log('getAddressContract()->', result);
+            console.log('myContractAddress->', myContractAddress);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });
+
+        myContract.methods.getBalanceAddr(myContractAddress).call()
+          .then( function(result) {
+            console.log('getBalanceAddr()->', result);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });
+
+      }
+ 
+      function obtenerSaldo(_addr) {
+        var total = 0;
+        if (_addr == null) {
+          console.log('ERR--> NO address');
+          return total;
+        }
+        else {
+          web3js.eth.getBalance(_addr)
+          .then( function(b) {
+            total = Web3.utils.fromWei(b, "ether");
+            console.log("Total Balance ->", total, " (ethers)");
+            alert('Wallet: (' + _addr + ') ' + '\n' + ' Saldo: ' + total);
+          })
+          .catch( function(r) {
+            console.log('ERR obtenerSaldo() -->', r);
+          })
+        }
+        return total;
+      }      
+
+      function verContratos() {
+
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+
+        // Ejecutar funciones del SC
+        //myContract.methods.myMethod(123).call();
+        //myContract.methods.myMethod(123).send();
+
+        // Hash de un mensaje
+        //web3js.eth.accounts.hashMessage(message);
+
+        console.log('Contract->');
+        console.log(myContract);
+      }
+
+      function muestraMensaje(_msg) {
+        var panel = document.getElementById("infoApp");
+        panel.innerHTML = '<p>' + _msg + '</p>';
+        panel.style.display = 'block';
+
+        msgInterval = setInterval(function () { 
+          document.getElementById("infoApp").style.display = 'none'; 
+          clearInterval(msgInterval);
+          }, 7000);
+      }
+
+      function muestraInfo(_msg) {
+        var panel = document.getElementById("infoWallet");
+        panel.innerHTML = '<p>' + _msg + '</p>';
+      }
+
+      function ocultar(_idObjeto) {
+        document.getElementById(_idObjeto).style="display: none;";
+      }
+
+      function mostrar(_idObjeto) {
+        var campo = document.getElementById(_idObjeto);
+        if (campo.style.display == 'none') {
+          campo.style="display: block;";
+        }
+        else {
+          campo.style="display: none;";
+        }
+      }
+
+
+      function obtenerTipoObjetos() {
+        var tipo = 0;
+        var eth = window.ethereum;
+        if (eth.selectedAddress != null) {
+          // Conectado.
+          myActualAddr = eth.selectedAddress;
+
+          console.log('ACTUAL --> ', myActualAddr, ' OWNER --> ', myContractOwner);
+          if (myActualAddr == myContractOwner.toLowerCase() ) {
+            // Admin
+            tipo = 1;
+          }
+          else {
+            // Colaborador
+            tipo = 2;
+          }
+        }
+
+
+        tipo = 1;
+
+
+        console.log('TIPO --> ', tipo);
+        return tipo;
+      }
+
+      function mostrarObjetos(_tipo) {
+
+        ocultar('columnaOraculo');
+        ocultar('columnaCMS');
+        ocultar('infoAviso');
+        ocultar('filaPiezas');
+        
+       
+        if (_tipo == 1) {
+          // Admin
+          mostrar('columnaOraculo');
+          mostrar('columnaCMS');
+          mostrar('filaPiezas');
+          ocultar('infoAviso');
+        }
+        else {
+          if (_tipo == 2) {
+            // Colaborador
+            ocultar('columnaOraculo');
+            ocultar('columnaCMS');
+            ocultar('filaPiezas');
+            mostrar('infoAviso');
+
+          }
+        }
+
+      }
+
+
+
+      // Comprobar Wallet
+      function comprobarBilletera() {
+
+        var eth = window.ethereum;
+        console.log('IsMETA-->', eth.isMetaMask);
+        console.log('Version-->', eth.networkVersion);
+        console.log('Addrr-->', eth.selectedAddress);
+        console.log('IsMETA-->', eth.isMetaMask);
+
+        var msgConectado = 'No conectado.';
+        if (eth.selectedAddress != null) {
+          msgConectado = 'Conectado --> ' + eth.selectedAddress;
+        }
+        var version = '';
+        if (eth.networkVersion != null) {
+          version = " Versión (" + eth.networkVersion + ")";
+        }
+        var msg = "Encontrada billetera" + version + ". " + msgConectado;
+        muestraInfo(msg);
+
+        if (eth.selectedAddress != null) {
+          // Parando timer
+          if (walletInterval != null) {
+            clearInterval(walletInterval);
+          }
+          walletInterval = null;
+
+          // Direccion actual
+          actualAddr = eth.selectedAddress;
+
+          // Obteniendo Saldo
+          var total = 0;
+          web3js.eth.getBalance(actualAddr)
+          .then( function(b) {
+            total = Web3.utils.fromWei(b, "ether");
+            console.log('Total Balance  (' + actualAddr + ') ->', total, ' (ethers)');
+            msg = msg + '. Saldo: ' + total + ' (ethers)';
+            muestraInfo(msg);
+          })
+          .catch( function(r) {
+            console.log('ERR getBalance() -->', r);
+          })
+        }
+
+        var tipo = obtenerTipoObjetos();
+        mostrarObjetos(tipo);
+      }
+
+      function pepe1() {
+
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        console.log('Contract->');
+        console.log(myContract);
+        console.log('Acc:', myContract.defaultAccount); 
+
+        /*
+        *************************
+        // Ejecutar funciones del SC
+        myContract.methods.saluda().call()
+          .then( function(aaa) {
+            console.log('CALL-saluda():', aaa)
+          });
+        *******************************
+        */
+
+        console.log(myContract.methods);
+        myWalletAddr = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
+
+        //var aa = myContract.methods.set(3).call();
+        myContract.methods.set(3).send(
+          {
+            from: myWalletAddr,
+            //value: web3js.utils.toWei("0.0001", "ether"),
+            data: 'dataaaaa'
+          }
+        )
+          .then( function(s) {
+            console.log('set()->', s);
+          })
+
+          /*
+          .then(
+            //b = myContract.methods.get().call()
+            myContract.methods.get().call()
+              .then( function(e) {
+                console.log('get()->', e);
+              })
+          )
+          */
+          .catch( function(r) {
+            console.log(r);
+          });
+
+
+        var b = myContract.methods.get().call()
+          .then( function(g) {
+            console.log('get()->',g, b);
+          })
+          .catch( function(r) {
+            console.log(r);
+          });
+
+      }
+
+
+      ///////////////////////////////////////////////////////////////
+      // Manejadores de botones - control eventos
+      ///////////////////////////////////////////////////////////////
+
+      // Conectar wallet
+      document.getElementById("conectarWallet").addEventListener('click', function(ev) {
+        // Para conectarse con la wallet
+        if (typeof window.ethereum == 'undefined') {
+          console.log('ERR En MetaMask ');
+          return false;
+        }
+
+        var eth = window.ethereum;
+        console.log('Conectando billetera....');
+        eth.request(
+          {method: 'eth_requestAccounts' }
+        )
+        .then( function(result) {
+          console.log(result);
+          comprobarBilletera();
+        })
+        .catch( function(err) {
+          console.log('ERR requestAccounts ->', err);
+        });
+        
+        eth.on('accountsChanged', function (accounts) {
+          console.log('cuenta cambiada!!!!');
+          comprobarBilletera();
+        });
+        eth.on('chainChanged', function (chainId) {
+          console.log('red cambiada!!!!');
+          comprobarBilletera();
+        });
+
+        //eth.removeListener('accountsChanged', handleAccountsChanged);
+        //eth.on('connect', function (c) {});
+        //eth.on('disconnect', function (d) {});
+        //eth.on('message', function (m) {});
+      }, );
+
+      // Saldo wallet
+      document.getElementById("saldoWallet").addEventListener('click', function(ev) {
+        obtenerSaldo(actualAddr);
+      }, );
+
+      // Cuentas
+      document.getElementById("cuentasWallet").addEventListener('click', function(ev) {
+        verCuentas();
+        verContratos();
+      });      
+
+      document.getElementById("verOwner").addEventListener('click', function(ev) {
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var ret = myContract.methods.getAddressOwner().call()
+        .then( function(g) {
+          console.log('getAddressOwner()->',g, ret);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+        return true;
+      });
+
+      //
+      // LOAD
+      //
+      window.addEventListener('load', function() {
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        //if (typeof web3 !== 'undefined') {
+        //  web3js = new Web3(window.web3.currentProvider);
+        //}
+        if (typeof window.ethereum != 'undefined') {
+          // Use Mist/MetaMask's provider
+          console.log('rama 1-->');
+          web3js = new Web3(window.ethereum);
+
+          muestraInfo('Iniciando wallet....');
+          walletInterval = setInterval(comprobarBilletera, 300);
+        }
+        /*
+        else if (typeof window.web3 !== 'undefined') {
+          // Handle the case where the user doesn't have Metamask installed
+          console.log('rama 2-->');
+          web3js = new Web3(window.web3.currentProvider);
+          console.log('currentProvider-->', window.web3.currentProvider);
+        }
+        */
+        else {
+          console.log('rama 2 -->');
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+
+          muestraInfo('Conectando a red. No se ha detectado ninguna billetera.');
+        }
+      })
+
+
+      //
+      // BOTONES FORMULARIO
+      //
+      document.getElementById("parar").addEventListener('click', function(ev) {
+        ////document.removeEventListener(nombreEventoevPublicado, function(ev) { console.log('PARA-->', ev); });
+        document.removeEventListener(nombreEventoevPublicado, gestionaEventoPublicado);
+        insertaMensaje('infoOraculo', 'info', 'Parando eventos ' + nombreEventoevPublicado + ' (CMS) ....');        
+      });
+      
+      document.getElementById("empezar").addEventListener('click', function(ev) {
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }        
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+        actualAddr =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+        console.log('Contract Address->', myContractAddress);
+
+        insertaMensaje('infoOraculo', 'info', 'Iniciando gestión de eventos del SC....');
+
+        //
+        // Capturando eventos del SC
+        //
+        var latestBlock = web3js.eth.blockNumber;
+        myContract.events.evAltaColaborador({fromBlock: latestBlock}, function(error, event) { 
+          console.log('evento evAltaColaborador->', event);
+          // igual que "data"
+        })
+        .on("connected", function(subscriptionId){
+            console.log('connected evAltaColaborador->', subscriptionId);
+        })
+        .on('data', function(event){
+
+            var idTransaction = event.transactionHash;
+            if ( ! listaTrx[idTransaction] ) {
+              listaTrx[idTransaction] = 1;
+
+              console.log('data evAltaColaborador->', event);
+              console.log('blocknumber->', event.blockNumber);
+              console.log('id transaccion->', idTransaction);
+
+              // Muestra info del evento recibido
+              var msg = 'Recibido: ' + event.event + '-->' + idTransaction;
+              insertaMensaje('infoOraculo', 'info', msg);
+            }
+
+        })
+        .on('changed', function(event){
+            // nada
+        })
+        .on('error', function(error, receipt) {
+          console.log('ERR->', receipt);
+          var msg = 'Error en evAltaColaborador';
+          insertaMensaje('infoOraculo', 'error', msg);
+        });
+        insertaMensaje('infoOraculo', 'info', 'Capturando eventos evAltaColaborador....');
+
+        //var latestBlock = web3js.eth.blockNumber; //get the latest blocknumber
+        myContract.events.evPiezaInsertada({fromBlock: latestBlock}, function(error, event){ 
+          console.log('evento evPiezaInsertada->', event);
+          // igual que "data"
+        })
+        .on("connected", function(subscriptionId){
+            console.log('connected evPiezaInsertada->', subscriptionId);
+        })
+        .on('data', function(event){
+
+            var idTransaction = event.transactionHash;
+            if ( ! listaTrx[idTransaction] ) {
+              listaTrx[idTransaction] = 1;
+
+              console.log('data evPiezaInsertada->', event);
+              console.log('blocknumber->', event.blockNumber);
+              console.log('id transaccion->', idTransaction);
+              // Muestra info del evento recibido
+              var msg = 'Recibido:' + event.event + '-->' + event.transactionHash;
+              insertaMensaje('infoOraculo', 'info', msg);
+              insertaMensaje('infoOraculo', 'info', 'Notificando al CMS...');
+
+              // Envia la pieza al CMS
+              enviaCMS(event);
+            }
+
+        })
+        .once('changed', function(event){
+            console.log('changed evPiezaInsertada->', event);
+        })
+        .once('error', function(error, receipt) {
+          console.log('ERR->', receipt);
+          var msg = 'Error en evPiezaInsertada';
+          insertaMensaje('infoOraculo', 'error', msg);
+        });
+        insertaMensaje('infoOraculo', 'info', 'Capturando eventos evPiezaInsertada....');
+
+        //
+        // Capturando eventos del API-CMS
+        //
+        document.addEventListener(nombreEventoevPublicado, gestionaEventoPublicado);
+        insertaMensaje('infoOraculo', 'info', 'Capturando eventos ' + nombreEventoevPublicado + ' (CMS) ....');
+        return true;
+      });
+
+      function gestionaEventoPublicado (ev) {
+            insertaMensaje('infoOraculo', 'info', 'Recibido: ' + nombreEventoevPublicado + ' --> Notificando al SC...');
+            ev.preventDefault();
+            console.log('EV CMS-->', ev);
+            peticionPublicaPieza(ev.detail);
+        }      
+
+      function insertaMensaje(idObjecto, tipo, _msg) {
+        var oDiv = document.createElement('div');
+        oDiv.className = 'texto';
+
+        if (tipo == 'error') {
+          oDiv.style = 'color: red;';
+        }
+        else if (tipo == 'ok') {
+          oDiv.style = 'color: green;';
+        }
+
+        var oTxt  = document.createTextNode(_msg);
+        oDiv.appendChild(oTxt);
+
+        var panel = document.getElementById(idObjecto);
+        panel.appendChild(oDiv);
+      }
+
+      function enviaCMS(_evento) {
+        var msg = 'Recibido:' + _evento.event + '-->' + _evento.transactionHash;
+        insertaMensaje('infoCMS', 'info', msg);
+        insertaMensaje('infoCMS', 'info', 'Procesando nueva pieza....');
+
+        console.log(_evento.returnValues);
+        var _evento = new eventoPieza(_evento.returnValues._addr, _evento.returnValues.codigoPieza, _evento.returnValues.tituloPieza);
+        insertaPieza('infoPiezas', _evento);
+      }
+
+      document.getElementById("addMsgCMS").addEventListener('click', function(ev) {
+        var msg = "Nuevo mensaje -> " + Date.now() + ' y mas texto a ver si rompe la lineaaa y algo mass y masss' ;
+        insertaMensaje('infoCMS', 'info', msg);
+      });
+
+      function eventoPieza(_addr, _codigo, _titulo, publicada=false, pagada=false) {
+        this.tituloPieza = _titulo; // 2
+        this.codigoPieza = _codigo; // 1
+        this._addr = _addr; // 0
+
+        this.publicada = publicada;
+        this.pagada = pagada;
+      }   
+   
+      document.getElementById("addPiezaCMS").addEventListener('click', function(ev) {
+        var ts = Date.now();
+        var _evento = new eventoPieza(actualAddr, ts, 'TITULO-' + ts);
+
+        insertaPieza('infoPiezas', _evento);
+      });
+
+
+      function objetoIMG() {
+        var oImg = document.createElement('IMG');
+        oImg.title = 'Pagado';
+        oImg.className = 'titulo-img';
+        oImg.width = 45;
+        oImg.src = '/TFE/app/img/eth.png';
+        return oImg;
+      }
+            
+      function insertaPieza(idObjecto, _evento) {
+
+        var oDiv = document.createElement('div');
+        oDiv.id = 'div' +  _evento.codigoPieza;
+
+        //////////////////////////////////////
+        //_evento.publicada = false;
+        //////////////////////////////////////
+        if (_evento.publicada == false) {
+          var oBtnPublicar = document.createElement('button');
+          oBtnPublicar.id = 'pz' + _evento.codigoPieza;
+          oBtnPublicar.setAttribute('data-id', _evento.codigoPieza);
+          oBtnPublicar.setAttribute('data-addr', _evento._addr);
+          //oBtnPublicar.innerHTML = "Publicar";
+          oBtnPublicar.innerHTML = "P";
+          oBtnPublicar.style = "width: 45px; ";
+          oBtnPublicar.className = 'btn btn-info';
+          oBtnPublicar.onclick = function() {
+              console.log('Publicando -->' + this.id );
+              publicaPieza(_evento);
+          };
+          oDiv.appendChild(oBtnPublicar);
+        }
+        else {
+          /*
+          var oTxtPublicado  = document.createTextNode('Publicado');
+          var oSpan = document.createElement('span');
+          oSpan.className = 'titulo-texto';
+          oSpan.appendChild(oTxtPublicado);          
+          oDiv.appendChild(oSpan);
+          */
+          
+          if (_evento.pagada == true) {
+            var oImg = objetoIMG();
+            oDiv.appendChild(oImg);
+          }
+
+        }
+
+        // Titulo
+        var oTxtTitulo  = document.createTextNode(_evento.tituloPieza);
+        var oSpan = document.createElement('span');
+        oSpan.className = 'titulo-texto';
+        oSpan.appendChild(oTxtTitulo);
+        oDiv.appendChild(oSpan);        
+
+        var panel = document.getElementById(idObjecto);
+        panel.appendChild(oDiv);
+      }
+
+      function publicaPieza (_evento) {
+        // Lanzar evento para el Oraculo WEB...que lo capture y notifique al SC
+        var evPublicar = new CustomEvent(nombreEventoevPublicado, {
+          detail: {
+            address: _evento._addr,
+            codigo: _evento.codigoPieza,
+            titulo: _evento.tituloPieza,
+          },
+        });
+        document.dispatchEvent(evPublicar);
+      }
+
+      function peticionPublicaPieza(_evento) {
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+
+        var _addr   = _evento.address;
+        var _codigo = _evento.codigo;
+        console.log('publicarPieza() -->', _addr, _codigo);
+
+        console.log('HEX ->', web3js.utils.isHex(_addr) );
+        console.log('ADDR ->', web3js.utils.isAddress(_addr) );
+
+        var ret = myContract.methods.publicarPieza(_addr, _codigo)
+          .send(
+            {
+              from: myAddress,
+              gas: 2100000,
+              gasPrice: 8000000000
+            } 
+          )
+          .on('transactionHash', function(receipt){
+            console.log('transactionHash()->', receipt);
+          })
+          .on('receipt', function(receipt){
+            console.log('onReceipt()->', receipt);
+          })
+          .on('confirmation', function(confirmationNumber, receipt){
+            console.log('confirmation()->', confirmationNumber, receipt);
+
+            var idTransaction = receipt.transactionHash;
+            if ( ! listaTrx[idTransaction] ) {
+              listaTrx[idTransaction] = 1;
+
+              console.log('hash id tx ->', idTransaction);
+              console.log('conf number->', confirmationNumber);
+              insertaMensaje('infoOraculo', 'ok', 'Pago realizado. Id transacción --> ' + idTransaction);
+
+              // Borrando la pieza del listado
+              pagoRealizado(_codigo);
+            }
+
+          })
+          .on('error', function(receipt){
+            console.log(receipt);
+            var hashErr = obtenerInfoError(receipt);
+            var msg = 'ERROR --> ' + hashErr.errorMsg + ' (' + hashErr.errorType + ')';
+            console.log(msg);
+            insertaMensaje('infoOraculo', 'error', msg);
+          });
+
+        console.log('retorno publicarPieza()->', ret);
+        return ret;
+      }
+
+      function obtenerInfoError(_hash) {
+        var hashError = Array();
+
+        var idTransaccion = -1;
+        var errCode = -1;
+        var errorType = 'error';
+        var errorMsg = 'Se ha producido un error genérico';
+
+        if (_hash.code == 4001) {
+          idTransaccion = -1;
+          errCode = _hash.code;
+          errorType = 'cancel';
+          errorMsg = 'Se ha cancelado la petición';
+        }
+
+        if (_hash.code == -32603) {
+          var msgTPL = "[ethjs-query] while formatting outputs from RPC";
+          var lenErr = msgTPL.length;
+          var msgErr = _hash.message.substr(lenErr + 1);
+          msgErr = msgErr.replace(/'/g, '');
+          console.log('obtenerInfoError()->', msgErr);
+
+          var jsonErr = JSON.parse(msgErr);
+          console.log('error()->', jsonErr);
+
+          console.log('error(H)->', jsonErr['value']['data']['data']);
+          var hashErr = jsonErr['value']['data']['data'];
+          var arrEntries = Object.entries(hashErr);
+          
+          console.log(arrEntries);
+          console.log(arrEntries[0][0]);
+          console.log((arrEntries[0][1]).error);
+          console.log((arrEntries[0][1]).reason);
+
+          idTransaccion = arrEntries[0][0];
+          errCode = _hash.code;
+          errorType = arrEntries[0][1].error;
+          errorMsg = arrEntries[0][1].reason;
+        }
+
+        hashError.idTransaccion = idTransaccion;
+        hashError.errCode       = errCode;
+        hashError.errorType     = errorType;
+        hashError.errorMsg      = errorMsg;
+
+        return hashError;
+      }
+
+      function pagoRealizado(_codigo) {
+        var boton = document.getElementById('pz' + _codigo);
+        boton.style = 'display: none;';
+        var oImg = objetoIMG();
+        var panel = document.getElementById('div' + _codigo);
+        panel.insertBefore(oImg, boton);
+      }
+
+
+      document.getElementById("limpiarPanel").addEventListener('click', function(ev) {
+        var panel = document.getElementById('infoOraculo');
+        panel.innerHTML = '';
+      });
+
+      document.getElementById("addMsg").addEventListener('click', function(ev) {
+        var msg = "Nuevo mensaje -> " + Date.now() + ' y mas texto a ver si rompe la lineaaa y algo mass y masss' ;
+        insertaMensaje('infoOraculo', 'info', msg);
+      });
+
+      document.getElementById("limpiarPanelCMS").addEventListener('click', function(ev) {
+        document.getElementById('infoCMS').innerHTML = '';
+        document.getElementById('infoPiezas').innerHTML = '';
+      });      
+
+      document.getElementById("botonVerNoticias").addEventListener('click', function(ev) {
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+
+        document.getElementById('infoPiezas').innerHTML = '';
+        var ret = myContract.methods.obtenerTodosColaboradores().call()
+          .then( function(aColaboradores) {
+            console.log('call obtenerTodosColaboradores()->', aColaboradores);
+
+            var aPiezas = Array();
+            var lenC = aColaboradores.length;
+            for (var i=0; i< lenC; i++) {
+              var datosColaborador = aColaboradores[i];
+              var addrColaborador = datosColaborador.addr;
+              console.log('(' + i + ')->', addrColaborador);
+
+              var ret = myContract.methods.obtenerTodasPiezasColaborador(addrColaborador).call()
+                .then( function(piezas) {
+                  console.log('call obtenerTodasPiezasColaborador()->', piezas);
+
+                  var lenP = piezas.length;
+                  for (var j=0; j < lenP; j++) {
+                    var datosPieza = piezas[j];
+                    console.log(datosPieza);
+                    var _evento = new eventoPieza(datosPieza.addr, datosPieza.codigoPieza, datosPieza.tituloPieza, datosPieza.publicada, datosPieza.pagada);
+                    insertaPieza('infoPiezas', _evento);
+                  }
+                })
+                .catch( function(r) {
+                  console.log('ERROR obtenerTodasPiezasColaborador()', r);
+                });
+            }
+            console.log('ARRAY-->', aPiezas);
+
+          })
+          .catch( function(r) {
+            console.log('ERROR obtenerTodosColaboradores()', r);
+          });
+      });
+
+/*
+***********
+      document.getElementById("pagarPieza").addEventListener('click', function(ev) {
+
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+
+        var valorBilletera = document.getElementById('inputBilleteraPagar').value;
+        var codigoPieza = document.getElementById('inputCodigoPiezaPagar').value;
+
+        if ( 
+          (valorBilletera == '') || (codigoPieza == '')
+        ) {
+          alert('Hay que completar todos los campos');
+          return false;
+        }
+        console.log('pagarPublicacion() -->', valorBilletera, codigoPieza);
+
+        var ret = myContract.methods.pagarPublicacion(valorBilletera, codigoPieza)
+          .send(
+            {
+              from: valorBilletera,
+            } 
+          )
+          .once('transactionHash', function(receipt){
+            console.log('transactionHash()->', receipt);
+          })
+          .once('receipt', function(receipt){
+            console.log('onReceipt()->', receipt);
+          })
+          .on('confirmation', function(confirmationNumber, receipt){
+            console.log('confirmation()->', confirmationNumber, receipt);
+
+            var idTransaction = receipt.transactionHash;
+            console.log('hash id ->', receipt.transactionHash);
+            console.log('conf number->', confirmationNumber);
+            muestraMensaje('Pago realizado. Id transacción --> ' + idTransaction);
+          })
+          .on('error', function(receipt){
+            console.log('error()->', receipt);
+          })               
+          .then( function(result) {
+            console.log('call pagarPublicacion()->', result);
+          })
+          .catch( function(r) {
+            //console.log(r);
+          });
+        console.log('retorno pagarPublicacion()->', ret);
+      });
+**************
+*/
+
+      function YYY() {
+        
+        var eth = window.ethereum;
+        if (eth.selectedAddress == null) {
+          eth.request(
+            {method: 'eth_requestAccounts' }
+          )
+          .then( function(result) {
+            console.log(result);
+            $("#info").empty();
+            $("#info").append('<p>' + result  + '</p>');
+          })
+          .catch( function(err) {
+            console.log('ERR requestAccounts ->', err);
+          });
+          return false;
+        }        
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+
+
+        /*
+        // Estimacion de gas
+        console.log('Estimando gas.....');
+        web3js.eth.getGasPrice()
+        .then( function(gas) {
+          console.log('retorno(GAS)->',gas);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+
+        console.log('obtenerOwner() -->');
+        var ret = myContract.methods.obtenerOwner().estimateGas()
+        .then( function(g) {
+          console.log('estimateGas obtenerOwner()->',g, ret);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+        //return true;
+
+        console.log('obtenerOwner() -->');
+        var ret = myContract.methods.obtenerOwner().call()
+        .then( function(g) {
+          console.log('obtenerOwner()->',g, ret);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+        //return true;
+        */
+
+
+        /*
+        **************************
+        var ret = myContract.methods.obtenerTodosColaboradores().estimateGas()
+        .then( function(g) {
+          console.log('estimateGas obtenerTodosColaboradores()->',g, ret);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+
+        var ret = myContract.methods.obtenerTodosColaboradores().call()
+        .then( function(g) {
+          console.log('obtenerTodosColaboradores()->',g, ret);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+        **************************
+        */
+
+        /*
+        **************************
+        myContract.methods.existeColaborador("1").estimateGas()
+        .then( function(result) {
+          console.log('estimateGas existeColaborador()->', result);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+
+        myContract.methods.existeColaborador("1").call()
+        .then( function(result) {
+          console.log('estimateGas existeColaborador()->', result);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+        //return true;
+        **************************
+        */
+
+        var srcWalletAddr2 = 0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442;
+
+/*
+*********
+web3.eth.sendTransaction({from: '0x123...', data: '0x432...'})
+.once('sending', function(payload){ ... })
+.once('sent', function(payload){ ... })
+.once('transactionHash', function(hash){ ... })
+.once('receipt', function(receipt){ ... })
+.on('confirmation', function(confNumber, receipt, latestBlockHash){ ... })
+.on('error', function(error){ ... })
+.then(function(receipt){
+    // will be fired once the receipt is mined
+});
+******
+*/
+
+        web3js.eth.getBlock("latest", false, (error, result) => {
+          console.log('block->', result.gasLimit)
+          // => 8000029
+        });
+
+
+        myContract.methods.insertarPieza2("titulo", "url").estimateGas()
+        .then( function(result) {
+          console.log('estimateGas insertarPieza2()->', result);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+
+
+        var nuevaAddr = eth.selectedAddress;
+        console.log('insertarPieza()->', nuevaAddr);
+        myContract.methods.insertarPieza2("titulo", "url").send(
+          {
+            from: nuevaAddr
+            //value:    10000000000000000,
+            //gasPrice: "0x7A1200",
+            ////gasPrice: 8000000,
+            ////gasLimit: 90000000,
+            //gasLimit: "0x7ACFC0"
+          }
+        )
+        .once('transactionHash', function(receipt){
+          console.log('transactionHash()->', receipt);
+        })
+        .once('receipt', function(receipt){
+          console.log('onReceipt()->', receipt);
+        })
+        .on('confirmation', function(confirmationNumber, receipt){
+          console.log('confirmation()->', confirmationNumber, receipt);
+        })
+        .on('error', function(receipt){
+          console.log('error()->', receipt);
+        })               
+        .then( function(result) {
+          console.log('call insertarPieza2()->', result);
+        })
+        .catch( function(r) {
+          //console.log(r);
+        });
+
+        return true;
+
+        myContract.methods.altaColaborador(myAddress, "pepe", "1", "jjj@gmail.com", "1234").estimateGas()
+        //myContract.methods.altaColaborador().estimateGas()
+        .then( function(result) {
+          console.log('estimateGas altaColaborador()->', result);
+        })
+        .catch( function(r) {
+          console.log(r);
+        });
+
+      };
+
+      function XXX() {
+
+        var eth = window.ethereum;
+        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
+        var myAddress =  eth.selectedAddress;
+
+        console.log('Contract->', myContract);
+        console.log('Methods->', myContract.methods);
+        console.log('Mi Address->', myAddress);
+
+        console.log('invocandoEvento()->');
+        myContract.events.evExisteColaborador({}, function(error, event){ console.log('EVENTO-->', event); })
+        .on("connected", function(subscriptionId){
+        console.log(subscriptionId);
+        })
+        .on('data', function(event){
+            console.log(event); // same results as the optional callback above
+        })
+          .on('changed', function(event){
+            // remove event from local database
+        })
+          .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+            //...
+        });
+        /*
+        .catch( function(r) {
+          console.log(r);
+        });
+        */
+      };
+     
+    </script>
+</html>
+ 

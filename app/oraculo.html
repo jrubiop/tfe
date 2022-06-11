@@ -72,6 +72,8 @@
 
   </head>
   <body class="main">
+    <h2>Editor: Oráculo y CMS</h2>
+    <span>Para simular las interacciones entre el SC y el CMS</span>
 
     <div class="container">
       <div class="row">
@@ -100,8 +102,7 @@
             <div class="btn-group" role="group" aria-label="Botonera">
               <button type="button" id="empezar" class="btn btn-secondary">Escuchar eventos</button>
               <button type="button" id="parar" class="btn btn-secondary">Parar</button>
-                <button type="button" id="addMsg" class="btn btn-secondary">Nuevo MSG</button>
-              <button type="button" id="limpiarPanel" class="btn btn-secondary">Limpiar</button>
+              <button type="button" id="limpiarPanel" class="btn btn-secondary">Limpiar Panel</button>
             </div>
           </div>
           <div class="row">
@@ -118,10 +119,7 @@
           </div>
           <div class="row">
             <div class="col-12">
-              <button type="button" id="addMsgCMS" class="btn btn-secondary">Nuevo MSG CMS</button>
-              <button type="button" id="limpiarPanelCMS" class="btn btn-secondary">Limpiar CMS</button>
-              <button type="button" id="addPiezaCMS" class="btn btn-secondary">New Pieza CMS</button>
-              <button id="botonVerNoticias"  type="button" class="btn btn-success">Listar noticias</button>
+              <button type="button" id="limpiarPanelCMS" class="btn btn-secondary">Limpiar Panel</button>
             </div>
           </div>
           <div class="row">
@@ -133,11 +131,20 @@
       </div>
 
       <div id="filaPiezas" class="row">
-        <div id="msgInfoPiezas" class="classTextoInfoCMS" role="alert">
-          <h2>Listado de noticias del CMS</h2>
+        <div class="row">
+          <div id="msgInfoPiezas" class="classTextoInfoCMS" role="alert">
+            <h2>Listado de noticias del CMS</h2>
+          </div>
         </div>
-        <div class="Global">
-          <div id="infoPiezas" class="classInfoCMS" role="alert"></div>  
+        <div class="row">
+          <div class="col-12"> 
+            <button id="botonVerNoticias"  type="button" class="btn btn-success">Listar noticias</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="Global">
+            <div id="infoPiezas" class="classInfoCMS" role="alert"></div>  
+          </div>
         </div>
       </div>
 
@@ -280,7 +287,6 @@
         }
       }
 
-
       function obtenerTipoObjetos() {
         var tipo = 0;
         var eth = window.ethereum;
@@ -298,11 +304,6 @@
             tipo = 2;
           }
         }
-
-
-        tipo = 1;
-
-
         console.log('TIPO --> ', tipo);
         return tipo;
       }
@@ -334,8 +335,6 @@
         }
 
       }
-
-
 
       // Comprobar Wallet
       function comprobarBilletera() {
@@ -385,62 +384,6 @@
         mostrarObjetos(tipo);
       }
 
-      function pepe1() {
-
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        console.log('Contract->');
-        console.log(myContract);
-        console.log('Acc:', myContract.defaultAccount); 
-
-        /*
-        *************************
-        // Ejecutar funciones del SC
-        myContract.methods.saluda().call()
-          .then( function(aaa) {
-            console.log('CALL-saluda():', aaa)
-          });
-        *******************************
-        */
-
-        console.log(myContract.methods);
-        myWalletAddr = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
-
-        //var aa = myContract.methods.set(3).call();
-        myContract.methods.set(3).send(
-          {
-            from: myWalletAddr,
-            //value: web3js.utils.toWei("0.0001", "ether"),
-            data: 'dataaaaa'
-          }
-        )
-          .then( function(s) {
-            console.log('set()->', s);
-          })
-
-          /*
-          .then(
-            //b = myContract.methods.get().call()
-            myContract.methods.get().call()
-              .then( function(e) {
-                console.log('get()->', e);
-              })
-          )
-          */
-          .catch( function(r) {
-            console.log(r);
-          });
-
-
-        var b = myContract.methods.get().call()
-          .then( function(g) {
-            console.log('get()->',g, b);
-          })
-          .catch( function(r) {
-            console.log(r);
-          });
-
-      }
-
 
       ///////////////////////////////////////////////////////////////
       // Manejadores de botones - control eventos
@@ -476,11 +419,7 @@
           comprobarBilletera();
         });
 
-        //eth.removeListener('accountsChanged', handleAccountsChanged);
-        //eth.on('connect', function (c) {});
-        //eth.on('disconnect', function (d) {});
-        //eth.on('message', function (m) {});
-      }, );
+      });
 
       // Saldo wallet
       document.getElementById("saldoWallet").addEventListener('click', function(ev) {
@@ -504,40 +443,6 @@
         });
         return true;
       });
-
-      //
-      // LOAD
-      //
-      window.addEventListener('load', function() {
-
-        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-        //if (typeof web3 !== 'undefined') {
-        //  web3js = new Web3(window.web3.currentProvider);
-        //}
-        if (typeof window.ethereum != 'undefined') {
-          // Use Mist/MetaMask's provider
-          console.log('rama 1-->');
-          web3js = new Web3(window.ethereum);
-
-          muestraInfo('Iniciando wallet....');
-          walletInterval = setInterval(comprobarBilletera, 300);
-        }
-        /*
-        else if (typeof window.web3 !== 'undefined') {
-          // Handle the case where the user doesn't have Metamask installed
-          console.log('rama 2-->');
-          web3js = new Web3(window.web3.currentProvider);
-          console.log('currentProvider-->', window.web3.currentProvider);
-        }
-        */
-        else {
-          console.log('rama 2 -->');
-          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-
-          muestraInfo('Conectando a red. No se ha detectado ninguna billetera.');
-        }
-      })
-
 
       //
       // BOTONES FORMULARIO
@@ -611,7 +516,7 @@
         });
         insertaMensaje('infoOraculo', 'info', 'Capturando eventos evAltaColaborador....');
 
-        //var latestBlock = web3js.eth.blockNumber; //get the latest blocknumber
+        //var latestBlock = web3js.eth.blockNumber;
         myContract.events.evPiezaInsertada({fromBlock: latestBlock}, function(error, event){ 
           console.log('evento evPiezaInsertada->', event);
           // igual que "data"
@@ -691,11 +596,6 @@
         insertaPieza('infoPiezas', _evento);
       }
 
-      document.getElementById("addMsgCMS").addEventListener('click', function(ev) {
-        var msg = "Nuevo mensaje -> " + Date.now() + ' y mas texto a ver si rompe la lineaaa y algo mass y masss' ;
-        insertaMensaje('infoCMS', 'info', msg);
-      });
-
       function eventoPieza(_addr, _codigo, _titulo, publicada=false, pagada=false) {
         this.tituloPieza = _titulo; // 2
         this.codigoPieza = _codigo; // 1
@@ -705,14 +605,6 @@
         this.pagada = pagada;
       }   
    
-      document.getElementById("addPiezaCMS").addEventListener('click', function(ev) {
-        var ts = Date.now();
-        var _evento = new eventoPieza(actualAddr, ts, 'TITULO-' + ts);
-
-        insertaPieza('infoPiezas', _evento);
-      });
-
-
       function objetoIMG() {
         var oImg = document.createElement('IMG');
         oImg.title = 'Pagado';
@@ -912,20 +804,17 @@
       }
 
 
+      //
+      // Funciones Colaboradores
+      //      
       document.getElementById("limpiarPanel").addEventListener('click', function(ev) {
         var panel = document.getElementById('infoOraculo');
         panel.innerHTML = '';
       });
 
-      document.getElementById("addMsg").addEventListener('click', function(ev) {
-        var msg = "Nuevo mensaje -> " + Date.now() + ' y mas texto a ver si rompe la lineaaa y algo mass y masss' ;
-        insertaMensaje('infoOraculo', 'info', msg);
-      });
-
       document.getElementById("limpiarPanelCMS").addEventListener('click', function(ev) {
         document.getElementById('infoCMS').innerHTML = '';
-        document.getElementById('infoPiezas').innerHTML = '';
-      });      
+      });
 
       document.getElementById("botonVerNoticias").addEventListener('click', function(ev) {
 
@@ -985,281 +874,28 @@
           });
       });
 
-/*
-***********
-      document.getElementById("pagarPieza").addEventListener('click', function(ev) {
+      //
+      // LOAD
+      //
+      window.addEventListener('load', function() {
 
-        var eth = window.ethereum;
-        if (eth.selectedAddress == null) {
-          eth.request(
-            {method: 'eth_requestAccounts' }
-          )
-          .then( function(result) {
-            console.log(result);
-          })
-          .catch( function(err) {
-            console.log('ERR requestAccounts ->', err);
-          });
-          return false;
+        // Comprobando si existe variable definida por alguna wallet
+        if (typeof window.ethereum != 'undefined') {
+          // Existe wallet Metamask
+          console.log('rama 1-->');
+          web3js = new Web3(window.ethereum);
+
+          muestraInfo('Iniciando wallet....');
+          walletInterval = setInterval(comprobarBilletera, 300);
         }
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-        var valorBilletera = document.getElementById('inputBilleteraPagar').value;
-        var codigoPieza = document.getElementById('inputCodigoPiezaPagar').value;
-
-        if ( 
-          (valorBilletera == '') || (codigoPieza == '')
-        ) {
-          alert('Hay que completar todos los campos');
-          return false;
+        else {
+          console.log('rama 2 -->');
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+          muestraInfo('Conectando a blockchain local. No se ha detectado ninguna billetera.');
         }
-        console.log('pagarPublicacion() -->', valorBilletera, codigoPieza);
-
-        var ret = myContract.methods.pagarPublicacion(valorBilletera, codigoPieza)
-          .send(
-            {
-              from: valorBilletera,
-            } 
-          )
-          .once('transactionHash', function(receipt){
-            console.log('transactionHash()->', receipt);
-          })
-          .once('receipt', function(receipt){
-            console.log('onReceipt()->', receipt);
-          })
-          .on('confirmation', function(confirmationNumber, receipt){
-            console.log('confirmation()->', confirmationNumber, receipt);
-
-            var idTransaction = receipt.transactionHash;
-            console.log('hash id ->', receipt.transactionHash);
-            console.log('conf number->', confirmationNumber);
-            muestraMensaje('Pago realizado. Id transacción --> ' + idTransaction);
-          })
-          .on('error', function(receipt){
-            console.log('error()->', receipt);
-          })               
-          .then( function(result) {
-            console.log('call pagarPublicacion()->', result);
-          })
-          .catch( function(r) {
-            //console.log(r);
-          });
-        console.log('retorno pagarPublicacion()->', ret);
-      });
-**************
-*/
-
-      function YYY() {
-        
-        var eth = window.ethereum;
-        if (eth.selectedAddress == null) {
-          eth.request(
-            {method: 'eth_requestAccounts' }
-          )
-          .then( function(result) {
-            console.log(result);
-            $("#info").empty();
-            $("#info").append('<p>' + result  + '</p>');
-          })
-          .catch( function(err) {
-            console.log('ERR requestAccounts ->', err);
-          });
-          return false;
-        }        
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-
-        /*
-        // Estimacion de gas
-        console.log('Estimando gas.....');
-        web3js.eth.getGasPrice()
-        .then( function(gas) {
-          console.log('retorno(GAS)->',gas);
-        })
-        .catch( function(r) {
-          console.log(r);
         });
 
-        console.log('obtenerOwner() -->');
-        var ret = myContract.methods.obtenerOwner().estimateGas()
-        .then( function(g) {
-          console.log('estimateGas obtenerOwner()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-
-        console.log('obtenerOwner() -->');
-        var ret = myContract.methods.obtenerOwner().call()
-        .then( function(g) {
-          console.log('obtenerOwner()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-        */
-
-
-        /*
-        **************************
-        var ret = myContract.methods.obtenerTodosColaboradores().estimateGas()
-        .then( function(g) {
-          console.log('estimateGas obtenerTodosColaboradores()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-        var ret = myContract.methods.obtenerTodosColaboradores().call()
-        .then( function(g) {
-          console.log('obtenerTodosColaboradores()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        **************************
-        */
-
-        /*
-        **************************
-        myContract.methods.existeColaborador("1").estimateGas()
-        .then( function(result) {
-          console.log('estimateGas existeColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-        myContract.methods.existeColaborador("1").call()
-        .then( function(result) {
-          console.log('estimateGas existeColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-        **************************
-        */
-
-        var srcWalletAddr2 = 0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442;
-
-/*
-*********
-web3.eth.sendTransaction({from: '0x123...', data: '0x432...'})
-.once('sending', function(payload){ ... })
-.once('sent', function(payload){ ... })
-.once('transactionHash', function(hash){ ... })
-.once('receipt', function(receipt){ ... })
-.on('confirmation', function(confNumber, receipt, latestBlockHash){ ... })
-.on('error', function(error){ ... })
-.then(function(receipt){
-    // will be fired once the receipt is mined
-});
-******
-*/
-
-        web3js.eth.getBlock("latest", false, (error, result) => {
-          console.log('block->', result.gasLimit)
-          // => 8000029
-        });
-
-
-        myContract.methods.insertarPieza2("titulo", "url").estimateGas()
-        .then( function(result) {
-          console.log('estimateGas insertarPieza2()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-
-        var nuevaAddr = eth.selectedAddress;
-        console.log('insertarPieza()->', nuevaAddr);
-        myContract.methods.insertarPieza2("titulo", "url").send(
-          {
-            from: nuevaAddr
-            //value:    10000000000000000,
-            //gasPrice: "0x7A1200",
-            ////gasPrice: 8000000,
-            ////gasLimit: 90000000,
-            //gasLimit: "0x7ACFC0"
-          }
-        )
-        .once('transactionHash', function(receipt){
-          console.log('transactionHash()->', receipt);
-        })
-        .once('receipt', function(receipt){
-          console.log('onReceipt()->', receipt);
-        })
-        .on('confirmation', function(confirmationNumber, receipt){
-          console.log('confirmation()->', confirmationNumber, receipt);
-        })
-        .on('error', function(receipt){
-          console.log('error()->', receipt);
-        })               
-        .then( function(result) {
-          console.log('call insertarPieza2()->', result);
-        })
-        .catch( function(r) {
-          //console.log(r);
-        });
-
-        return true;
-
-        myContract.methods.altaColaborador(myAddress, "pepe", "1", "jjj@gmail.com", "1234").estimateGas()
-        //myContract.methods.altaColaborador().estimateGas()
-        .then( function(result) {
-          console.log('estimateGas altaColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-      };
-
-      function XXX() {
-
-        var eth = window.ethereum;
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-        console.log('invocandoEvento()->');
-        myContract.events.evExisteColaborador({}, function(error, event){ console.log('EVENTO-->', event); })
-        .on("connected", function(subscriptionId){
-        console.log(subscriptionId);
-        })
-        .on('data', function(event){
-            console.log(event); // same results as the optional callback above
-        })
-          .on('changed', function(event){
-            // remove event from local database
-        })
-          .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-            //...
-        });
-        /*
-        .catch( function(r) {
-          console.log(r);
-        });
-        */
-      };
-     
+    
     </script>
 </html>
  

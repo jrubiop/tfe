@@ -124,15 +124,6 @@ contract Pieza {
         return true;
     }
 
-    function pagarPieza(address _addr) private returns (bool) {
-        //require(address(this).balance >= 1 ether, 'NO hay saldo suficiente...');
-
-        //(bool ret, bytes memory datos) = payable(_addr).call{value:1000000000000000}("");
-        (bool ret, ) = payable(_addr).call{value:1 ether}("");
-        require(ret, 'Error al pagar!!!....');
-        return ret;
-    }
-
     // Para poder recibir pagos
     receive() external payable {}
 

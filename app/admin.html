@@ -19,8 +19,8 @@
     <title>TFE: App Editores</title>
   </head>
   <body class="main">
-    <h2>App Editor (administrador)</h2>
-    <span>Para gestionar colaboradores y piezas (publicar y pagar)</span>
+    <h2>Editor (administrador y colaborador)</h2>
+    <span>Para gestionar colaboradores y piezas</span>
 
     <div class="container">
       <!-- Botones de acciones especiales -->
@@ -31,12 +31,10 @@
             <label for="inputCuenta" class="form-label">Cuenta</label>
             <input type="text" id="inputCuenta">
             <button id="saldoWallet"    name="saldoWallet" type="button" class="btn btn-secondary">Saldo Cuenta</button>
-            <button style="display: none;" id="cuentasWallet" name="cuentasWallet" type="button" class="btn btn-secondary">Ver Cuentas</button>
-            <button id="verOwner" name="verOwner" type="button" class="btn btn-secondary">Info Contrato</button>
+            <button id="infoOwner" name="infoOwner" type="button" class="btn btn-secondary">Info Contrato</button>
           </div>
         </div>
         <div class="col-4">
-          <div id="infoContracto" class="alert alert-warning" style="display: none;"></div>
         </div>
       </div>
       <!-- Mensajes -->
@@ -60,12 +58,6 @@
           <div class="btn-group-vertical" role="group" aria-label="Botonera Colaborador">
             <button type="button" id="altaPieza" class="btn btn-primary">Nueva pieza</button>
             <button type="button" id="verPiezas" class="btn btn-info">Ver piezas</button>
-
-            <button type="button" id="doTX" class="btn btn-secondary">Enviar TX</button>
-            <button type="button" id="verTX" class="btn btn-secondary">EVENTOS</button>
-
-            <button type="button" id="mostrarPublicarPieza" class="btn btn-success">Publicar</button>
-            <button type="button" id="pagarPieza" class="btn btn-warning">PAGAR</button>
           </div>
         </div>
 
@@ -149,22 +141,6 @@
             <div class="row" id="idListadoPiezas"></div>          
         </div>
 
-        <!-- publicar piezas -->
-        <div class="col-2" id="datosPublicar" style="display: none;">
-          <!-- formulario alta pieza -->
-          <form id="formularioDatosPublicar">
-            <div class="mb-3">
-              <label for="inputBilleteraPagar" class="form-label">Dirección Billetera</label>
-              <input type="text" class="form-control" id="inputBilleteraPagar">
-            </div>
-            <div class="mb-3">
-              <label for="inputCodigoPiezaPagar" class="col-sm-8 col-form-label">Codigo pieza</label>
-              <input type="text" class="form-control" id="inputCodigoPiezaPagar">
-            </div>
-            <button id="enviarDatosPublicar"   type="button" class="btn btn-success">Publicar</button>
-            <button id="cancelarDatosPublicar" type="button" class="btn btn-danger">Cancelar</button>
-          </form>
-        </div>        
       </div>
     </div>
   </body>
@@ -254,11 +230,6 @@
         panel.innerHTML = '<p>' + _msg + '</p>';
       }
 
-      function muestraInfoContracto(_msg) {
-        var panel = document.getElementById("infoContracto");
-        panel.innerHTML = '<p>' + _msg + '</p>';
-      }      
-
       function ocultar(_idObjeto) {
         document.getElementById(_idObjeto).style="display: none;";
       }
@@ -276,19 +247,12 @@
         }
       }
 
-
       function obtenerInfoContrato() {
-        //getBalanceContract()
-        //getAddressContract()
-        //var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-
         console.log('obtenerInfoContrato() -->', myContractAddress);
-
         web3js.eth.getBalance(myContractAddress)
         .then( function(b) {
           total = Web3.utils.fromWei(b, "ether");
           msg = 'Direccion -> ' + myContractAddress + '. Saldo: ' + total + ' (ethers)';
-          muestraInfoContracto(msg);
           alert(msg);
         })
         .catch( function(r) {
@@ -315,20 +279,11 @@
           }
         }
 
-
-        tipo = 1;
-
-
         console.log('TIPO --> ', tipo);
         return tipo;
       }
 
       function mostrarObjetos(_tipo) {
-
-        ocultar('doTX');
-        ocultar('verTX');
-        ocultar('mostrarPublicarPieza');
-        ocultar('pagarPieza');
 
         mostrar('botonesAcciones');
         if (_tipo == 1) {
@@ -339,10 +294,6 @@
           mostrar('verPiezas');
 
           mostrar('botonesOperaciones');
-
-          // Muestra info del contrato.
-          //mostrar('infoContracto');
-          //obtenerInfoContrato();
         }
         else {
           if (_tipo == 2) {
@@ -353,7 +304,6 @@
             mostrar('verPiezas');
             
             mostrar('botonesOperaciones');
-            ocultar('infoContracto');
           }
         }
 
@@ -406,8 +356,6 @@
 
         return hashError;
       }
-
-
 
       // Comprobar Wallet
       function comprobarBilletera() {
@@ -518,13 +466,8 @@
         obtenerSaldo(addr);
       });
 
-      // Cuentas
-      document.getElementById("cuentasWallet").addEventListener('click', function(ev) {
-        verCuentas();
-        verContratos();
-      });      
-
-      document.getElementById("verOwner").addEventListener('click', function(ev) {
+      // Info propietario
+      document.getElementById("infoOwner").addEventListener('click', function(ev) {
 
         var myContract = new web3js.eth.Contract(myABI, myContractAddress);
         var ret = myContract.methods.getAddressOwner().call()
@@ -558,58 +501,17 @@
         });
 
         obtenerInfoContrato();
-
         return true;
       });
 
       //
-      // LOAD
-      //
-      window.addEventListener('load', function() {
-
-        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-        //if (typeof web3 !== 'undefined') {
-        //  web3js = new Web3(window.web3.currentProvider);
-        //}
-        if (typeof window.ethereum != 'undefined') {
-          // Use Mist/MetaMask's provider
-          console.log('rama 1-->');
-          web3js = new Web3(window.ethereum);
-
-          muestraInfo('Iniciando wallet....');
-          walletInterval = setInterval(comprobarBilletera, 300);
-
-          tipoAcceso = obtenerTipoObjetos();
-          mostrarObjetos(tipoAcceso);
-        }
-        /*
-        else if (typeof window.web3 !== 'undefined') {
-          // Handle the case where the user doesn't have Metamask installed
-          console.log('rama 2-->');
-          web3js = new Web3(window.web3.currentProvider);
-          console.log('currentProvider-->', window.web3.currentProvider);
-        }
-        */
-        else {
-          console.log('rama 2 -->');
-          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-
-          muestraInfo('Conectando a red. No se ha detectado ninguna billetera.');
-        }
-
-
-      })
-
-
-      //
-      // BOTONES FORMULARIO
+      // Funciones Piezas
       //
       document.getElementById("altaPieza").addEventListener('click', function(ev) {
         // Ocultar datos
         ocultar('datosListado');
         ocultar('datosAltaColaborador');
         ocultar('datosListadoColaborador');
-        ocultar('datosPublicar');
 
         document.getElementById("formularioDatos").reset();
         mostrar('datosAlta');
@@ -720,7 +622,6 @@
         ocultar('datosAlta');
         ocultar('datosAltaColaborador');
         ocultar('datosListadoColaborador');
-        ocultar('datosPublicar');
 
         document.getElementById("formularioBuscarPieza").reset();
         document.getElementById("idListadoPiezas").innerHTML = '';
@@ -757,41 +658,49 @@
 
       function pintaPiezas(tipo, listadoPiezas) {
         var html = '';
+
+        html = html + '<table class="table">';
+        html = html + '  <thead>';
+        html = html + '  <tr>';        
         var len = listadoPiezas.length;
         if (len > 0) {
-          html = html + '<div class="row">';
-          html = html + '<div class="col">Codigo</div>';
-          html = html + '<div class="col">Titulo</div>';
-          html = html + '<div class="col">URL</div>';
-          html = html + '<div class="col">Publicado</div>';
-          html = html + '<div class="col">Pagado</div>';
-          html = html + '</div>';
+          html = html + '<th scope="col">Código</th>';
+          html = html + '<th>Titulo</th>';
+          html = html + '<th>URL</th>';
+          html = html + '<th>Publicado</th>';
+          html = html + '<th>Pagado</th>';
         }
         else {
-          html = html + '<div class="row">';
-          html = html + '<p>No hay piezas para esa dirección (' + tipo + ')</p>';
-          html = html + '</div>';
+          html = html + '<th scope="col">No hay piezas para esa dirección (' + tipo + ')</th>';
         }
+        html = html + '  </tr>';
+        html = html + '  </thead>';
+        html = html + '  <tbody>';
 
         for (var i=0; i < len; i++) {
           var p = listadoPiezas[i];
-          html = html + '<div class="row">';
-          html = html + '<div class="col">' + p.codigoPieza + '</div>';
-          html = html + '<div class="col">' + p.tituloPieza + '</div>';
-          html = html + '<div class="col">' + p.urlPieza + '</div>';
-          html = html + '<div class="col">' + p.publicada + '</div>';
-          html = html + '<div class="col">' + p.pagada + '</div>';
-          html = html + '</div>';
+          html = html + '<tr>';
+          html = html + '<th scope="row">' + p.codigoPieza + '</th>';
+          html = html + '<td>' + p.tituloPieza + '</td>';
+          html = html + '<td>' + p.urlPieza + '</td>';
+          html = html + '<td>' + p.publicada + '</td>';
+          html = html + '<td>' + p.pagada + '</td>';
+          html = html + '</tr>';
         }
+        html = html + '  </tbody>';
+        html = html + '  </table>';
         document.getElementById('idListadoPiezas').innerHTML = html;
       }
 
+
+      //
+      // Funciones Colaboradores
+      //
       document.getElementById("altaColaborador").addEventListener('click', function(ev) {
         // Ocultar datos
         ocultar('datosListadoColaborador');
         ocultar('datosAlta');
         ocultar('datosListado');
-        ocultar('datosPublicar');
 
         document.getElementById("formularioDatosColaborador").reset();
         mostrar('datosAltaColaborador');
@@ -937,7 +846,6 @@
         ocultar('datosAltaColaborador');
         ocultar('datosAlta');
         ocultar('datosListado');
-        ocultar('datosPublicar');
 
         document.getElementById("formularioBuscarColaborador").reset();
         document.getElementById("idListadoColaboradores").innerHTML = '';
@@ -1001,403 +909,87 @@
         }
 
       });
-
+      
       function pintaColaboradores(tipo, listadoColaboradores) {
         var html = '';
         var len = listadoColaboradores.length;
+
+        html = html + '<table class="table">';
+        html = html + '  <thead>';
+        html = html + '  <tr>';
+
         if (len > 0) {
-          html = html + '<div class="row">';
-          html = html + '<div class="col-1">Nombre</div>';
-          html = html + '<div class="col-1">NIF</div>';
-          html = html + '<div class="col-1">Email</div>';
-          html = html + '<div class="col-1">Tfno</div>';
-          html = html + '<div class="col-1">Dirección</div>';
-          html = html + '<div class="col-1">Activo</div>';
-          html = html + '</div>';
+          html = html + '<th scope="col">NIF</th>';
+          html = html + '<th scope="col">Nombre</th>';
+          html = html + '<th scope="col">Email</th>';
+          html = html + '<th scope="col">Tfno</th>';
+          html = html + '<th scope="col">Dirección</th>';
+          //html = html + '<th scope="col">Activo</th>';
         }
         else {
-          html = html + '<div class="row">';
-          html = html + '<p>No existen datos para esa dirección (' + tipo + ')</p>';
-          html = html + '</div>';
+          html = html + '<th scope="col">No existen datos para esa dirección (' + tipo + ')</th>';
         }
+        html = html + '  </tr>';
+        html = html + '  </thead>';
 
-        ////console.log('len-->', len);
+        html = html + '  <tbody>';
         for (var i=0; i < len; i++) {
           var c = listadoColaboradores[i];
-
-          ////console.log('C-->', c);
-
           // Proteccion cuando viene solo un elemento
           if (typeof c.addr !== 'undefined') {
-            html = html + '<div class="row">';
-            html = html + '<div class="col">' + c.nombre + '</div>';
-            html = html + '<div class="col">' + c.NIF + '</div>';
-            html = html + '<div class="col">' + c.email + '</div>';
-            html = html + '<div class="col">' + c.tfno + '</div>';
-            html = html + '<div class="col">' + c.addr + '</div>';
-            html = html + '<div class="col">' + c.activo + '</div>';
-            html = html + '</div>';
+            html = html + '<tr>';
+            html = html + '<th scope="row">' + c.NIF + '</th>';
+            html = html + '<td>' + c.nombre + '</td>';
+            html = html + '<td>' + c.email + '</td>';
+            html = html + '<td>' + c.tfno + '</td>';
+            html = html + '<td>' + c.addr + '</td>';
+            //html = html + '<td>' + c.activo + '</td>';
+            html = html + '</tr>';
           }
-
         }
+        html = html + '  </tbody>';
+        html = html + '  </table>';
         document.getElementById('idListadoColaboradores').innerHTML = html;
       }
 
+      //
+      // LOAD
+      //
+      window.addEventListener('load', function() {
 
-      document.getElementById("enviarDatosPublicar").addEventListener('click', function(ev) {
-        alert('publicarNoticia');
-      });
-      
-      document.getElementById("cancelarDatosPublicar").addEventListener('click', function(ev) {
-        document.getElementById("formularioDatosPublicar").reset();
-        ocultar('datosPublicar');
-      });
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        //if (typeof web3 !== 'undefined') {
+        //  web3js = new Web3(window.web3.currentProvider);
+        //}
+        if (typeof window.ethereum != 'undefined') {
+          // Use Mist/MetaMask's provider
+          console.log('rama 1-->');
+          web3js = new Web3(window.ethereum);
 
-      document.getElementById("mostrarPublicarPieza").addEventListener('click', function(ev) {
-        // Ocultar datos
-        ocultar('datosAltaColaborador');
-        ocultar('datosListadoColaborador');
-        ocultar('datosAlta');
-        ocultar('datosListado');
+          muestraInfo('Iniciando wallet....');
+          walletInterval = setInterval(comprobarBilletera, 300);
 
-        document.getElementById("formularioDatosPublicar").reset();
-        mostrar('datosPublicar');
-      });
-
-      document.getElementById("pagarPieza").addEventListener('click', function(ev) {
-
-        var eth = window.ethereum;
-        if (eth.selectedAddress == null) {
-          eth.request(
-            {method: 'eth_requestAccounts' }
-          )
-          .then( function(result) {
-            console.log(result);
-          })
-          .catch( function(err) {
-            console.log('ERR requestAccounts ->', err);
-          });
-          return false;
+          tipoAcceso = obtenerTipoObjetos();
+          mostrarObjetos(tipoAcceso);
         }
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-        var valorBilletera = document.getElementById('inputBilleteraPagar').value;
-        var codigoPieza = document.getElementById('inputCodigoPiezaPagar').value;
-
-        if ( 
-          (valorBilletera == '') || (codigoPieza == '')
-        ) {
-          alert('Hay que completar todos los campos');
-          return false;
+        /*
+        else if (typeof window.web3 !== 'undefined') {
+          // Handle the case where the user doesn't have Metamask installed
+          console.log('rama 2-->');
+          web3js = new Web3(window.web3.currentProvider);
+          console.log('currentProvider-->', window.web3.currentProvider);
         }
-        console.log('pagarPublicacion() -->', valorBilletera, codigoPieza);
+        */
+        else {
+          console.log('rama 2 -->');
+          web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
 
-        var ret = myContract.methods.pagarPublicacion(valorBilletera, codigoPieza)
-          .send(
-            {
-              from: valorBilletera,
-            } 
-          )
-          .once('transactionHash', function(receipt){
-            console.log('transactionHash()->', receipt);
-          })
-          .once('receipt', function(receipt){
-            console.log('onReceipt()->', receipt);
-          })
-          .on('confirmation', function(confirmationNumber, receipt){
-            console.log('confirmation()->', confirmationNumber, receipt);
+          muestraInfo('Conectando a red. No se ha detectado ninguna billetera.');
+        }
 
-            var idTransaction = receipt.transactionHash;
-            console.log('hash id ->', receipt.transactionHash);
-            console.log('conf number->', confirmationNumber);
-            muestraMensaje('Pago realizado. Id transacción --> ' + idTransaction, true);
-          })
-          .on('error', function(receipt){
-            console.log('error()->', receipt);
-          })               
-          .then( function(result) {
-            console.log('call pagarPublicacion()->', result);
-          })
-          .catch( function(r) {
-            //console.log(r);
-          });
-        console.log('retorno pagarPublicacion()->', ret);
       });
 
 
-      document.getElementById("doTX").addEventListener('click', function(ev) {
-        
-
-        var eth = window.ethereum;
-        if (eth.selectedAddress == null) {
-          eth.request(
-            {method: 'eth_requestAccounts' }
-          )
-          .then( function(result) {
-            console.log(result);
-            $("#info").empty();
-            $("#info").append('<p>' + result  + '</p>');
-          })
-          .catch( function(err) {
-            console.log('ERR requestAccounts ->', err);
-          });
-          return false;
-        }        
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-
-        /*
-        // Estimacion de gas
-        console.log('Estimando gas.....');
-        web3js.eth.getGasPrice()
-        .then( function(gas) {
-          console.log('retorno(GAS)->',gas);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-        console.log('obtenerOwner() -->');
-        var ret = myContract.methods.obtenerOwner().estimateGas()
-        .then( function(g) {
-          console.log('estimateGas obtenerOwner()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-
-        console.log('obtenerOwner() -->');
-        var ret = myContract.methods.obtenerOwner().call()
-        .then( function(g) {
-          console.log('obtenerOwner()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-        */
-
-
-        /*
-        **************************
-        var ret = myContract.methods.obtenerTodosColaboradores().estimateGas()
-        .then( function(g) {
-          console.log('estimateGas obtenerTodosColaboradores()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-        var ret = myContract.methods.obtenerTodosColaboradores().call()
-        .then( function(g) {
-          console.log('obtenerTodosColaboradores()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        **************************
-        */
-
-        /*
-        **************************
-        myContract.methods.existeColaborador("1").estimateGas()
-        .then( function(result) {
-          console.log('estimateGas existeColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-        myContract.methods.existeColaborador("1").call()
-        .then( function(result) {
-          console.log('estimateGas existeColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        //return true;
-        **************************
-        */
-
-        var srcWalletAddr2 = 0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442;
-
-/*
-*********
-web3.eth.sendTransaction({from: '0x123...', data: '0x432...'})
-.once('sending', function(payload){ ... })
-.once('sent', function(payload){ ... })
-.once('transactionHash', function(hash){ ... })
-.once('receipt', function(receipt){ ... })
-.on('confirmation', function(confNumber, receipt, latestBlockHash){ ... })
-.on('error', function(error){ ... })
-.then(function(receipt){
-    // will be fired once the receipt is mined
-});
-******
-*/
-
-        web3js.eth.getBlock("latest", false, (error, result) => {
-          console.log('block->', result.gasLimit)
-          // => 8000029
-        });
-
-
-        myContract.methods.insertarPieza2("titulo", "url").estimateGas()
-        .then( function(result) {
-          console.log('estimateGas insertarPieza2()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-
-        var nuevaAddr = eth.selectedAddress;
-        console.log('insertarPieza()->', nuevaAddr);
-        myContract.methods.insertarPieza2("titulo", "url").send(
-          {
-            from: nuevaAddr
-            //value:    10000000000000000,
-            //gasPrice: "0x7A1200",
-            ////gasPrice: 8000000,
-            ////gasLimit: 90000000,
-            //gasLimit: "0x7ACFC0"
-          }
-        )
-        .once('transactionHash', function(receipt){
-          console.log('transactionHash()->', receipt);
-        })
-        .once('receipt', function(receipt){
-          console.log('onReceipt()->', receipt);
-        })
-        .on('confirmation', function(confirmationNumber, receipt){
-          console.log('confirmation()->', confirmationNumber, receipt);
-        })
-        .on('error', function(receipt){
-          console.log('error()->', receipt);
-        })               
-        .then( function(result) {
-          console.log('call insertarPieza2()->', result);
-        })
-        .catch( function(r) {
-          //console.log(r);
-        });
-
-        return true;
-
-        myContract.methods.altaColaborador(myAddress, "pepe", "1", "jjj@gmail.com", "1234").estimateGas()
-        //myContract.methods.altaColaborador().estimateGas()
-        .then( function(result) {
-          console.log('estimateGas altaColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-
-
-      });
-
-      document.getElementById("verTX").addEventListener('click', function(ev) {
-
-        /*
-        *************************************
-        ****** Ver info de transaccion
-        *************************************
-        var idTx = '0xa8ba69306b728be266884dbc7fbf71d4622e0e75150e11a7236a3f6dbdc49337';
-        var myContract = new web3js.eth.getTransaction(idTx)
-        .then( function(result) {
-          console.log('TX()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        */
-
-
-        /*
-        *********************************************
-        * Ver la version del SC
-        *********************************************
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var ret = myContract.methods.obtenerVersion().call()
-        .then( function(g) {
-          console.log('obtenerVersion()->',g, ret);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        return true;
-        *******************************************
-        */
-
-        /*
-        ****************************
-        * Ver colaboradores 
-        ****************************
-        var eth = window.ethereum;
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-
-        var add = '0x9eb3CB5d6e421f876D7B3e7e527eFb40aF076442';
-
-        console.log('Mi Address 2->', add);
-        myContract.methods.obtenerTodasPiezasColaborador(add).call()
-        .then( function(result) {
-          console.log('obtenerTodasPiezasColaborador()->', result);
-        })
-        .catch( function(r) {
-          console.log(r);
-        });
-        ********************************************
-        */
-
-        var eth = window.ethereum;
-        var myContract = new web3js.eth.Contract(myABI, myContractAddress);
-        var myAddress =  eth.selectedAddress;
-
-        console.log('Contract->', myContract);
-        console.log('Methods->', myContract.methods);
-        console.log('Mi Address->', myAddress);
-
-        console.log('invocandoEvento()->');
-        myContract.events.evExisteColaborador({}, function(error, event){ console.log('EVENTO-->', event); })
-        .on("connected", function(subscriptionId){
-        console.log(subscriptionId);
-        })
-        .on('data', function(event){
-            console.log(event); // same results as the optional callback above
-        })
-          .on('changed', function(event){
-            // remove event from local database
-        })
-          .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-            //...
-        });
-        /*
-        .catch( function(r) {
-          console.log(r);
-        });
-        */
-
-        
-
-      });
-     
     </script>
 </html>
  
